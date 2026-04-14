@@ -8,7 +8,6 @@
     <link rel="apple-touch-icon" href="./icon.png">
 
     <style>
-        /* المتغيرات للألوان */
         :root {
             --bg-color: #c4ccd3; --calc-bg-top: #dcdfe5; --calc-bg-bottom: #a3a8b0;
             --brand-color: #2c3e50; --screen-bg: #9cb5a2; --screen-border: #6b7778;
@@ -26,103 +25,103 @@
         }
 
         body {
-            min-height: 100vh; background-color: var(--bg-color); margin: 0;
-            font-family: 'Arial', sans-serif; user-select: none; transition: background-color 0.4s ease; overflow: hidden; 
-        }
-
-        .theme-toggle {
-            position: absolute; top: 20px; right: 20px; padding: 10px 20px; border: none; border-radius: 20px;
-            background-color: var(--toggle-btn-bg); color: var(--toggle-btn-color);
-            font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 100;
+            background-color: var(--bg-color); margin: 0;
+            font-family: 'Arial', sans-serif; user-select: none; transition: background-color 0.4s ease; 
+            overflow: hidden; touch-action: none; 
         }
 
         .calculator {
             background: linear-gradient(to bottom, var(--calc-bg-top), var(--calc-bg-bottom));
-            padding: 25px 20px; border-radius: 40px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-            box-shadow: 0 20px 40px var(--shadow-color), inset 0 2px 8px rgba(255,255,255,0.2);
-            width: 330px; transition: background 0.4s ease, box-shadow 0.4s ease;
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); will-change: left, top;
+            padding: max(env(safe-area-inset-top), 15px) 15px max(env(safe-area-inset-bottom), 15px);
+            box-sizing: border-box; width: 100vw; height: 100dvh; 
+            display: flex; flex-direction: column; position: fixed; top: 0; left: 0;
+            transition: background 0.4s ease;
+        }
+
+        @media (min-width: 600px) {
+            .calculator {
+                width: 380px; height: 85vh; min-height: 680px;
+                position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                border-radius: 30px; box-shadow: 0 20px 40px var(--shadow-color), inset 0 2px 8px rgba(255,255,255,0.2);
+            }
         }
 
         .brand-area {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; padding: 10px; border-radius: 10px; cursor: grab;
+            margin-bottom: 10px; padding: 0 5px; height: 50px; flex-shrink: 0;
         }
-        .brand-area:active { cursor: grabbing; }
 
-        .brand { font-weight: 900; font-size: 20px; color: var(--brand-color); letter-spacing: 1px; transition: 0.4s;}
-        .model { font-size: 11px; font-style: italic; color: #16a085; font-weight: bold; text-align: right; }
+        .brand { font-weight: 900; font-size: 22px; color: var(--brand-color); letter-spacing: 1px;}
+        .model { font-size: 10px; font-style: italic; color: #16a085; font-weight: bold; }
 
-        /* الشاشة والأرقام الكبيرة */
+        .theme-toggle {
+            padding: 6px 12px; border: none; border-radius: 15px; font-size: 11px;
+            background-color: var(--toggle-btn-bg); color: var(--toggle-btn-color);
+            font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
         .screen-container {
-            background-color: var(--screen-bg); padding: 5px 10px; border-radius: 6px;
-            border: 3px solid var(--screen-border); box-shadow: inset 0 3px 15px rgba(0,0,0,0.25);
-            margin-bottom: 25px; height: 85px; display: flex; flex-direction: column; justify-content: space-between;
-            transition: 0.4s;
+            background-color: var(--screen-bg); padding: 10px; border-radius: 8px;
+            border: 3px solid var(--screen-border); box-shadow: inset 0 3px 10px rgba(0,0,0,0.25);
+            margin-bottom: 15px; flex-shrink: 0; height: 20%; min-height: 90px;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
         
-        .screen-indicators { font-size: 10px; font-family: monospace; font-weight: bold; color: var(--text-color); display: flex; gap: 10px; }
+        .screen-indicators { font-size: 10px; font-family: monospace; font-weight: bold; color: var(--text-color); display: flex; gap: 12px; }
         
         .screen-expression { 
             width: 100%; border: none; background: transparent; text-align: left; 
-            font-size: 24px; font-family: 'Courier New', Courier, monospace; color: var(--text-color); 
-            outline: none; letter-spacing: 2px; cursor: text;
+            font-size: 26px; font-family: 'Courier New', Courier, monospace; color: var(--text-color); 
+            outline: none; letter-spacing: 2px; cursor: text; margin-top: 5px;
         }
         
         .screen-result { 
-            width: 100%; text-align: right; font-size: 30px; font-weight: bold; 
+            width: 100%; text-align: right; font-size: 34px; font-weight: bold; 
             font-family: 'Courier New', Courier, monospace; color: var(--text-color); min-height: 35px; 
         }
 
-        /* تنسيق أسهم التحريك (D-pad) */
-        .d-pad {
-            position: relative; width: 75px; height: 60px; background-color: var(--screen-border);
-            border-radius: 35px; display: flex; justify-content: center; align-items: center;
-            margin-top: -15px; border: 2px solid var(--sci-btn-bg);
-            box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), 0 4px 0 rgba(0,0,0,0.4);
-        }
-        .dir-btn {
-            position: absolute; background: transparent; color: var(--text-color);
-            border: none; font-size: 10px; cursor: pointer; padding: 5px; box-shadow: none; font-weight: bold;
-        }
-        .dir-btn:active { transform: scale(0.8); box-shadow: none; }
-        .dir-btn.up { top: 2px; } .dir-btn.down { bottom: 2px; }
-        .dir-btn.left { left: 5px; } .dir-btn.right { right: 5px; }
-        .d-pad-center { font-size: 9px; color: var(--text-color); font-weight: bold; }
-
-        .keypad { display: grid; gap: 10px; }
+        .keypad { display: flex; flex-direction: column; flex-grow: 1; gap: 2%; }
+        .row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2%; height: 10%; min-height: 55px; flex-shrink: 0;}
+        .row-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2%; flex-grow: 1; }
         
         button {
-            border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; 
-            padding: 12px 0; box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: background-color 0.4s, color 0.4s, transform 0.1s; position: relative;
+            border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: 0.1s; 
+            position: relative; width: 100%; height: 100%; padding: 0; display: flex; align-items: center; justify-content: center;
         }
-        button:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.3); }
+        button:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
 
-        .btn-shift { background-color: #f1c40f; color: #333; font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px; transition: 0.2s; }
-        .btn-alpha { background-color: #e74c3c; color: white; font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px; transition: 0.2s; }
-        .btn-on { background-color: var(--screen-border); color: var(--text-color); font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px;}
+        .d-pad {
+            position: relative; width: 85px; height: 60px; background-color: var(--screen-border);
+            border-radius: 30px; display: flex; justify-content: center; align-items: center;
+            border: 2px solid var(--sci-btn-bg); box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), 0 4px 0 rgba(0,0,0,0.4);
+        }
+        .dir-btn { position: absolute; background: transparent; color: var(--text-color); border: none; font-size: 12px; cursor: pointer; padding: 5px; box-shadow: none; font-weight: bold; width: auto; height: auto;}
+        .dir-btn:active { transform: scale(0.8); box-shadow: none; }
+        .dir-btn.up { top: 0px; } .dir-btn.down { bottom: 0px; } .dir-btn.left { left: 4px; } .dir-btn.right { right: 4px; }
+        .d-pad-center { font-size: 9px; color: var(--text-color); font-weight: bold; }
+
+        .btn-shift { background-color: #f1c40f; color: #333; font-size: 11px; border-radius: 50%; height: 45px; width: 45px; }
+        .btn-alpha { background-color: #e74c3c; color: white; font-size: 11px; border-radius: 50%; height: 45px; width: 45px; }
+        .btn-on { background-color: var(--screen-border); color: var(--text-color); font-size: 11px; border-radius: 50%; height: 45px; width: 45px; }
         
-        .btn-sci { background-color: var(--sci-btn-bg); color: var(--sci-btn-color); font-size: 13px; border-radius: 8px;} 
-        .btn-num, .btn-op { background-color: var(--num-btn-bg); color: var(--num-btn-color); font-size: 18px; border-radius: 8px;} 
-        .btn-del-ac { background-color: #e67e22; color: white; font-size: 16px; border-radius: 8px;} 
+        .btn-sci { background-color: var(--sci-btn-bg); color: var(--sci-btn-color); font-size: 14px; } 
+        .btn-num, .btn-op { background-color: var(--num-btn-bg); color: var(--num-btn-color); font-size: 20px; } 
+        .btn-del-ac { background-color: #e67e22; color: white; font-size: 16px; } 
 
-        .row-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 5px; }
-        .row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-
-        /* ستايل لزراير الألفا والشفت عشان تبان متناسقة مع تصميمك */
-        .alpha-text { position: absolute; top: -12px; right: 2px; font-size: 9px; color: #e74c3c; font-weight: bold; }
-        .shift-text { position: absolute; top: -12px; left: 2px; font-size: 9px; color: #f1c40f; font-weight: bold; }
-        
+        .alpha-text { position: absolute; top: 2px; right: 4px; font-size: 10px; color: #e74c3c; font-weight: bold; }
+        .shift-text { position: absolute; top: 2px; left: 4px; font-size: 10px; color: #f1c40f; font-weight: bold; }
     </style>
 </head>
 <body data-theme="dark">
 
-    <button class="theme-toggle" onclick="toggleTheme()">Light Mode ☀️</button>
-
     <div class="calculator" id="calculator">
-        <div class="brand-area" id="drag-handle" title="اسحب من هنا">
-            <div class="brand">CASIO</div>
-            <div class="model">fx-991ES PLUS<br><span style="color:#555; font-size: 9px;">NATURAL-V.P.A.M.</span></div>
+        <div class="brand-area">
+            <div>
+                <div class="brand">CASIO</div>
+                <div class="model">fx-991ES PLUS<br><span style="color:#555; font-size: 9px;">NATURAL-V.P.A.M.</span></div>
+            </div>
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">Light Mode ☀️</button>
         </div>
 
         <div class="screen-container">
@@ -154,17 +153,17 @@
 
             <div class="row-5">
                 <button class="btn-sci" onclick="insert('abs(')">abs</button>
-                <button class="btn-sci" onclick="insert('^3')">x³</button>
-                <button class="btn-sci" onclick="handleShiftBtn('!', '^(-1)')"><span class="shift-text">x!</span>x⁻¹</button> 
+                <button class="btn-sci" onclick="insert('^3')">x<sup>3</sup></button>
+                <button class="btn-sci" onclick="handleShiftBtn('!', '^-1')"><span class="shift-text">x!</span>x<sup>-1</sup></button> 
                 <button class="btn-sci" onclick="insert('log(')">log</button>
                 <button class="btn-sci" onclick="insert('ln(')">ln</button>
             </div>
             <div class="row-5">
-                <button class="btn-sci" onclick="insert('π')">π</button>
-                <button class="btn-sci" onclick="insert('√(')">√</button>
-                <button class="btn-sci" onclick="insert('^2')">x²</button>
-                <button class="btn-sci" onclick="insert('^')">x^</button>
-                <button class="btn-sci" onclick="insert('10^')">10^</button>
+                <button class="btn-sci" onclick="insert('pi')">π</button>
+                <button class="btn-sci" onclick="insert('sqrt(')">√</button>
+                <button class="btn-sci" onclick="insert('^2')">x<sup>2</sup></button>
+                <button class="btn-sci" onclick="insert('^')">x<sup>^</sup></button>
+                <button class="btn-sci" onclick="insert('*10^')">10<sup>x</sup></button>
             </div>
             <div class="row-5">
                 <button class="btn-sci" onclick="handleAlphaBtn('A', '-')"><span class="alpha-text">A</span>(-)</button> 
@@ -173,7 +172,7 @@
                 <button class="btn-sci" id="btn-sin" onclick="insertTrig('sin')">sin</button>
                 <button class="btn-sci" id="btn-cos" onclick="insertTrig('cos')">cos</button>
             </div>
-            <div class="row-5" style="margin-bottom: 20px;">
+            <div class="row-5">
                 <button class="btn-sci" id="btn-tan" onclick="insertTrig('tan')">tan</button>
                 <button class="btn-sci" onclick="handleAlphaBtn('X', '(')"><span class="alpha-text">X</span>(</button> 
                 <button class="btn-sci" onclick="handleAlphaBtn('Y', ')')"><span class="alpha-text">Y</span>)</button> 
@@ -192,8 +191,8 @@
                 <button class="btn-num" onclick="insert('4')">4</button>
                 <button class="btn-num" onclick="insert('5')">5</button>
                 <button class="btn-num" onclick="insert('6')">6</button>
-                <button class="btn-op" onclick="handleShiftBtn('P', '×')"><span class="shift-text">nPr</span>×</button> 
-                <button class="btn-op" onclick="handleShiftBtn('C', '÷')"><span class="shift-text">nCr</span>÷</button> 
+                <button class="btn-op" onclick="handleShiftBtn('P', '*')"><span class="shift-text">nPr</span>×</button> 
+                <button class="btn-op" onclick="handleShiftBtn('C', '/')"><span class="shift-text">nCr</span>÷</button> 
             </div>
             <div class="row-5">
                 <button class="btn-num" onclick="insert('1')">1</button>
@@ -205,7 +204,7 @@
             <div class="row-5">
                 <button class="btn-num" onclick="insert('0')">0</button>
                 <button class="btn-num" onclick="insert('.')">.</button>
-                <button class="btn-num" onclick="insert('×10^')">x10ˣ</button>
+                <button class="btn-num" onclick="insert('*10^')">x10<sup>x</sup></button>
                 <button class="btn-num" onclick="insert('Ans')">Ans</button>
                 <button class="btn-num" onclick="calculate()">=</button>
             </div>
@@ -217,15 +216,14 @@
         const resultDiv = document.getElementById('result');
         const shiftIndicator = document.getElementById('shift-indicator');
         const alphaIndicator = document.getElementById('alpha-indicator');
+        const themeBtn = document.getElementById('theme-btn');
         
         let lastAnswer = "0";
         let isShifted = false;
         let isAlpha = false;
         
-        // مساحة تخزين المتغيرات
         let memory = { A: 0, B: 0, X: 0, Y: 0, M: 0 };
 
-        // الدوال الرياضية المتقدمة
         function fact(n) {
             if (n < 0 || n % 1 !== 0) return NaN;
             if (n === 0 || n === 1) return 1;
@@ -242,15 +240,11 @@
         function atanD(x) { return Math.atan(x) * 180 / Math.PI; }
 
         function toggleShift() {
-            isShifted = !isShifted;
-            isAlpha = false; 
-            updateIndicators();
+            isShifted = !isShifted; isAlpha = false; updateIndicators();
         }
 
         function toggleAlpha() {
-            isAlpha = !isAlpha;
-            isShifted = false; 
-            updateIndicators();
+            isAlpha = !isAlpha; isShifted = false; updateIndicators();
         }
 
         function updateIndicators() {
@@ -265,24 +259,22 @@
             alphaBtn.style.transform = isAlpha ? 'scale(0.9)' : 'scale(1)';
             alphaBtn.style.boxShadow = isAlpha ? 'none' : '0 4px 0 rgba(0,0,0,0.3)';
 
-            document.getElementById('btn-sin').innerText = isShifted ? 'sin⁻¹' : 'sin';
-            document.getElementById('btn-cos').innerText = isShifted ? 'cos⁻¹' : 'cos';
-            document.getElementById('btn-tan').innerText = isShifted ? 'tan⁻¹' : 'tan';
+            document.getElementById('btn-sin').innerHTML = isShifted ? 'sin<sup>-1</sup>' : 'sin';
+            document.getElementById('btn-cos').innerHTML = isShifted ? 'cos<sup>-1</sup>' : 'cos';
+            document.getElementById('btn-tan').innerHTML = isShifted ? 'tan<sup>-1</sup>' : 'tan';
         }
 
         function insertTrig(type) {
-            if (isShifted) { insert(type + '⁻¹('); toggleShift(); } 
+            if (isShifted) { insert(type + '^-1('); toggleShift(); } 
             else { insert(type + '('); }
         }
 
         function handleAlphaBtn(alphaVal, normalVal) {
-            if (isAlpha) { insert(alphaVal); toggleAlpha(); }
-            else { insert(normalVal); }
+            if (isAlpha) { insert(alphaVal); toggleAlpha(); } else { insert(normalVal); }
         }
 
         function handleShiftBtn(shiftVal, normalVal) {
-            if (isShifted) { insert(shiftVal); toggleShift(); }
-            else { insert(normalVal); }
+            if (isShifted) { insert(shiftVal); toggleShift(); } else { insert(normalVal); }
         }
 
         function insert(value) {
@@ -299,7 +291,6 @@
             if (dir === 'right' && pos < exprInput.value.length) pos++;
             if (dir === 'up') pos = 0; 
             if (dir === 'down') pos = exprInput.value.length; 
-            
             exprInput.selectionStart = exprInput.selectionEnd = pos;
             exprInput.focus();
         }
@@ -314,10 +305,8 @@
         }
 
         function clearScreen() { 
-            exprInput.value = ""; 
-            resultDiv.innerText = "0";
-            if(isShifted) toggleShift(); 
-            if(isAlpha) toggleAlpha();
+            exprInput.value = ""; resultDiv.innerText = "0";
+            if(isShifted) toggleShift(); if(isAlpha) toggleAlpha();
             exprInput.focus();
         }
 
@@ -325,6 +314,7 @@
             let expr = exprInput.value;
             if (expr === "") return;
 
+            // تم استبدال الحروف الخاصة بأكواد آمنة
             expr = expr.replace(/(\d+)\(/g, '$1*(');
             expr = expr.replace(/(\d+)([ABXYM])/g, '$1*$2');
             expr = expr.replace(/\)\(/g, ')*(');
@@ -340,11 +330,11 @@
             expr = expr.replace(/(\d+)C(\d+)/g, 'nCr($1,$2)');
             
             let mathString = expr
-                .replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'Math.PI')
+                .replace(/pi/g, 'Math.PI')
                 .replace(/Ans/g, lastAnswer).replace(/\^/g, '**')
-                .replace(/sin⁻¹\(/g, 'asinD(').replace(/cos⁻¹\(/g, 'acosD(').replace(/tan⁻¹\(/g, 'atanD(')
+                .replace(/sin\^-1\(/g, 'asinD(').replace(/cos\^-1\(/g, 'acosD(').replace(/tan\^-1\(/g, 'atanD(')
                 .replace(/sin\(/g, 'sinD(').replace(/cos\(/g, 'cosD(').replace(/tan\(/g, 'tanD(')
-                .replace(/log\(/g, 'Math.log10(').replace(/ln\(/g, 'Math.log(').replace(/√\(/g, 'Math.sqrt(').replace(/abs\(/g, 'Math.abs(');
+                .replace(/log\(/g, 'Math.log10(').replace(/ln\(/g, 'Math.log(').replace(/sqrt\(/g, 'Math.sqrt(').replace(/abs\(/g, 'Math.abs(');
             
             try {
                 let result = eval(mathString);
@@ -352,51 +342,25 @@
                 resultDiv.innerText = result;
                 lastAnswer = result; 
                 exprInput.selectionStart = exprInput.selectionEnd = exprInput.value.length;
-            } catch (error) { 
-                resultDiv.innerText = 'Syntax ERROR'; 
-            }
+            } catch (error) { resultDiv.innerText = 'Syntax ERROR'; }
         }
 
         function toggleTheme() {
-            const body = document.body; const btn = document.querySelector('.theme-toggle');
+            const body = document.body; 
             if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme'); btn.innerText = 'Dark Mode 🌙';
+                body.removeAttribute('data-theme'); themeBtn.innerHTML = 'Dark Mode &#127769;';
             } else {
-                body.setAttribute('data-theme', 'dark'); btn.innerText = 'Light Mode ☀️';
+                body.setAttribute('data-theme', 'dark'); themeBtn.innerHTML = 'Light Mode &#9728;&#65039;';
             }
         }
-
-        const calculator = document.getElementById('calculator');
-        const dragHandle = document.getElementById('drag-handle');
-        let isDragging = false; let initialX, initialY, currentLeft, currentTop;
-
-        dragHandle.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            const style = window.getComputedStyle(calculator);
-            currentLeft = parseInt(style.left, 10); currentTop = parseInt(style.top, 10);
-            initialX = e.clientX; initialY = e.clientY;
-        });
-        document.addEventListener('mouseup', () => isDragging = false);
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                e.preventDefault();
-                calculator.style.left = `${currentLeft + (e.clientX - initialX)}px`;
-                calculator.style.top = `${currentTop + (e.clientY - initialY)}px`;
-            }
-        });
     </script>
 
     <script>
-        // التعديل هنا: ضفنا ./ قبل sw.js عشان يشتغل كويب أب من على جيتهاب
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                .then(registration => {
-                    console.log('Service Worker مسجل بنجاح في النطاق:', registration.scope);
-                })
-                .catch(error => {
-                    console.log('فشل تسجيل الـ Service Worker:', error);
-                });
+                .then(registration => { console.log('SW Registered'); })
+                .catch(error => { console.log('SW Failed:', error); });
             });
         }
     </script>
