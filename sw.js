@@ -1,11 +1,11 @@
-Enterconst cacheName = 'casio-v1';
+const cacheName = 'casio-v2';
 const assets = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon.png'
 ];
 
-// تثبيت الـ Service Worker وتخزين الملفات
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(cacheName).then(cache => {
@@ -14,7 +14,6 @@ self.addEventListener('install', e => {
   );
 });
 
-// تشغيل التطبيق من التخزين (Cache) في حالة عدم وجود نت
 self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(res => {
