@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Casio Pro Calculator</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        /* المتغيرات للألوان */
+        :root {
+            --bg-color: #c4ccd3; --calc-bg-top: #dcdfe5; --calc-bg-bottom: #a3a8b0;
+            --brand-color: #2c3e50; --screen-bg: #9cb5a2; --screen-border: #6b7778;
+            --text-color: #111; --num-btn-bg: #f8f9fa; --num-btn-color: #2c3e50;
+            --sci-btn-bg: #2c3e50; --sci-btn-color: #ecf0f1; --shadow-color: rgba(0,0,0,0.5);
+            --toggle-btn-bg: #2c3e50; --toggle-btn-color: #fff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a2e; --calc-bg-top: #222831; --calc-bg-bottom: #171b21;
+            --brand-color: #eeeeee; --screen-bg: #6e8273; --screen-border: #393e46;
+            --text-color: #000; --num-btn-bg: #393e46; --num-btn-color: #eeeeee;
+            --sci-btn-bg: #111418; --sci-btn-color: #00adb5; --shadow-color: rgba(0,0,0,0.8);
+            --toggle-btn-bg: #f1c40f; --toggle-btn-color: #111;
+        }
+
+        body {
+            min-height: 100vh; background-color: var(--bg-color); margin: 0;
+            font-family: 'Arial', sans-serif; user-select: none; transition: background-color 0.4s ease; overflow: hidden; 
+        }
+
+        .theme-toggle {
+            position: absolute; top: 20px; right: 20px; padding: 10px 20px; border: none; border-radius: 20px;
+            background-color: var(--toggle-btn-bg); color: var(--toggle-btn-color);
+            font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 100;
+        }
+
+        .calculator {
+            background: linear-gradient(to bottom, var(--calc-bg-top), var(--calc-bg-bottom));
+            padding: 25px 20px; border-radius: 40px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            box-shadow: 0 20px 40px var(--shadow-color), inset 0 2px 8px rgba(255,255,255,0.2);
+            width: 330px; transition: background 0.4s ease, box-shadow 0.4s ease;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); will-change: left, top;
+        }
+
+        .brand-area {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; padding: 10px; border-radius: 10px; cursor: grab;
+        }
+        .brand-area:active { cursor: grabbing; }
+
+        .brand { font-weight: 900; font-size: 20px; color: var(--brand-color); letter-spacing: 1px; transition: 0.4s;}
+        .model { font-size: 11px; font-style: italic; color: #16a085; font-weight: bold; text-align: right; }
+
+        /* الشاشة والأرقام الكبيرة */
+        .screen-container {
+            background-color: var(--screen-bg); padding: 5px 10px; border-radius: 6px;
+            border: 3px solid var(--screen-border); box-shadow: inset 0 3px 15px rgba(0,0,0,0.25);
+            margin-bottom: 25px; height: 85px; display: flex; flex-direction: column; justify-content: space-between;
+            transition: 0.4s;
+        }
+        
+        .screen-indicators { font-size: 10px; font-family: monospace; font-weight: bold; color: var(--text-color); display: flex; gap: 10px; }
+        
+        .screen-expression { 
+            width: 100%; border: none; background: transparent; text-align: left; 
+            font-size: 24px; font-family: 'Courier New', Courier, monospace; color: var(--text-color); 
+            outline: none; letter-spacing: 2px; cursor: text;
+        }
+        
+        .screen-result { 
+            width: 100%; text-align: right; font-size: 30px; font-weight: bold; 
+            font-family: 'Courier New', Courier, monospace; color: var(--text-color); min-height: 35px; 
+        }
+
+        /* تنسيق أسهم التحريك (D-pad) */
+        .d-pad {
+            position: relative; width: 75px; height: 60px; background-color: var(--screen-border);
+            border-radius: 35px; display: flex; justify-content: center; align-items: center;
+            margin-top: -15px; border: 2px solid var(--sci-btn-bg);
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), 0 4px 0 rgba(0,0,0,0.4);
+        }
+        .dir-btn {
+            position: absolute; background: transparent; color: var(--text-color);
+            border: none; font-size: 10px; cursor: pointer; padding: 5px; box-shadow: none; font-weight: bold;
+        }
+        .dir-btn:active { transform: scale(0.8); box-shadow: none; }
+        .dir-btn.up { top: 2px; } .dir-btn.down { bottom: 2px; }
+        .dir-btn.left { left: 5px; } .dir-btn.right { right: 5px; }
+        .d-pad-center { font-size: 9px; color: var(--text-color); font-weight: bold; }
+
+        .keypad { display: grid; gap: 10px; }
+        
+        button {
+            border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; 
+            padding: 12px 0; box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: background-color 0.4s, color 0.4s, transform 0.1s; position: relative;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.3); }
+
+        .btn-shift { background-color: #f1c40f; color: #333; font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px; transition: 0.2s; }
+        .btn-alpha { background-color: #e74c3c; color: white; font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px;}
+        .btn-on { background-color: var(--screen-border); color: var(--text-color); font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px;}
+        
+        .btn-sci { background-color: var(--sci-btn-bg); color: var(--sci-btn-color); font-size: 13px; border-radius: 8px;} 
+        .btn-num, .btn-op { background-color: var(--num-btn-bg); color: var(--num-btn-color); font-size: 18px; border-radius: 8px;} 
+        .btn-del-ac { background-color: #e67e22; color: white; font-size: 16px; border-radius: 8px;} 
+
+        .row-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 5px; }
+        .row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+    </style>
+</head>
+<body>
+
+    <button class="theme-toggle" onclick="toggleTheme()">Dark Mode 🌙</button>
+
+    <div class="calculator" id="calculator">
+        <div class="brand-area" id="drag-handle" title="اسحب من هنا">
+            <div class="brand">CASIO</div>
+            <div class="model">fx-991ES PLUS<br><span style="color:#555; font-size: 9px;">NATURAL-V.P.A.M.</span></div>
+        </div>
+
+        <div class="screen-container">
+            <div class="screen-indicators"><span id="shift-indicator" style="opacity: 0.2;">S</span> <span>D</span> <span>Math</span></div>
+            <input type="text" id="expression" class="screen-expression" inputmode="none" value="" autofocus>
+            <div id="result" class="screen-result">0</div>
+        </div>
+
+        <div class="keypad">
+            <div class="row-top">
+                <button class="btn-shift" onclick="toggleShift()">SHIFT</button>
+                <button class="btn-alpha">ALPHA</button>
+                
+                <div class="d-pad">
+                    <button class="dir-btn up" onclick="moveCursor('up')">▲</button>
+                    <button class="dir-btn left" onclick="moveCursor('left')">◀</button>
+                    <button class="dir-btn right" onclick="moveCursor('right')">▶</button>
+                    <button class="dir-btn down" onclick="moveCursor('down')">▼</button>
+                    <span class="d-pad-center">REPLAY</span>
+                </div>
+
+                <button class="btn-on">MODE</button>
+                <button class="btn-on" onclick="clearScreen()">ON</button>
+            </div>
+
+            <div class="row-5">
+                <button class="btn-sci" onclick="insert('abs(')">abs</button>
+                <button class="btn-sci" onclick="insert('^3')">x³</button>
+                <button class="btn-sci" onclick="insert('^(-1)')">x⁻¹</button>
+                <button class="btn-sci" onclick="insert('log(')">log</button>
+                <button class="btn-sci" onclick="insert('ln(')">ln</button>
+            </div>
+            <div class="row-5">
+                <button class="btn-sci" onclick="insert('π')">π</button>
+                <button class="btn-sci" onclick="insert('√(')">√</button>
+                <button class="btn-sci" onclick="insert('^2')">x²</button>
+                <button class="btn-sci" onclick="insert('^')">x^</button>
+                <button class="btn-sci" onclick="insert('10^')">10^</button>
+            </div>
+            <div class="row-5">
+                <button class="btn-sci" onclick="insert('-')">(-)</button>
+                <button class="btn-sci" onclick="insert('Ans')">Ans</button>
+                <button class="btn-sci">hyp</button>
+                <button class="btn-sci" id="btn-sin" onclick="insertTrig('sin')">sin</button>
+                <button class="btn-sci" id="btn-cos" onclick="insertTrig('cos')">cos</button>
+            </div>
+            <div class="row-5" style="margin-bottom: 20px;">
+                <button class="btn-sci" id="btn-tan" onclick="insertTrig('tan')">tan</button>
+                <button class="btn-sci" onclick="insert('(')">(</button>
+                <button class="btn-sci" onclick="insert(')')">)</button>
+                <button class="btn-sci">S⇔D</button>
+                <button class="btn-sci">M+</button>
+            </div>
+
+            <div class="row-5">
+                <button class="btn-num" onclick="insert('7')">7</button>
+                <button class="btn-num" onclick="insert('8')">8</button>
+                <button class="btn-num" onclick="insert('9')">9</button>
+                <button class="btn-del-ac" onclick="deleteAtCursor()">DEL</button>
+                <button class="btn-del-ac" onclick="clearScreen()">AC</button>
+            </div>
+            <div class="row-5">
+                <button class="btn-num" onclick="insert('4')">4</button>
+                <button class="btn-num" onclick="insert('5')">5</button>
+                <button class="btn-num" onclick="insert('6')">6</button>
+                <button class="btn-op" onclick="insert('×')">×</button>
+                <button class="btn-op" onclick="insert('÷')">÷</button>
+            </div>
+            <div class="row-5">
+                <button class="btn-num" onclick="insert('1')">1</button>
+                <button class="btn-num" onclick="insert('2')">2</button>
+                <button class="btn-num" onclick="insert('3')">3</button>
+                <button class="btn-op" onclick="insert('+')">+</button>
+                <button class="btn-op" onclick="insert('-')">-</button>
+            </div>
+            <div class="row-5">
+                <button class="btn-num" onclick="insert('0')">0</button>
+                <button class="btn-num" onclick="insert('.')">.</button>
+                <button class="btn-num" onclick="insert('×10^')">x10ˣ</button>
+                <button class="btn-num" onclick="insert('Ans')">Ans</button>
+                <button class="btn-num" onclick="calculate()">=</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const exprInput = document.getElementById('expression');
+        const resultDiv = document.getElementById('result');
+        const shiftIndicator = document.getElementById('shift-indicator');
+        let lastAnswer = "0";
+        let isShifted = false;
+
+        function sinD(x) { return Math.sin(x * Math.PI / 180); }
+        function cosD(x) { return Math.cos(x * Math.PI / 180); }
+        function tanD(x) { return Math.tan(x * Math.PI / 180); }
+        function asinD(x) { return Math.asin(x) * 180 / Math.PI; }
+        function acosD(x) { return Math.acos(x) * 180 / Math.PI; }
+        function atanD(x) { return Math.atan(x) * 180 / Math.PI; }
+
+        function toggleShift() {
+            isShifted = !isShifted;
+            const shiftBtn = document.querySelector('.btn-shift');
+            shiftBtn.style.transform = isShifted ? 'scale(0.9)' : 'scale(1)';
+            shiftBtn.style.boxShadow = isShifted ? 'none' : '0 4px 0 rgba(0,0,0,0.3)';
+            shiftIndicator.style.opacity = isShifted ? '1' : '0.2';
+            
+            document.getElementById('btn-sin').innerText = isShifted ? 'sin⁻¹' : 'sin';
+            document.getElementById('btn-cos').innerText = isShifted ? 'cos⁻¹' : 'cos';
+            document.getElementById('btn-tan').innerText = isShifted ? 'tan⁻¹' : 'tan';
+        }
+
+        function insertTrig(type) {
+            if (isShifted) {
+                insert(type + '⁻¹(');
+                toggleShift(); 
+            } else {
+                insert(type + '(');
+            }
+        }
+
+        function insert(value) {
+            let start = exprInput.selectionStart;
+            let text = exprInput.value;
+            exprInput.value = text.substring(0, start) + value + text.substring(start);
+            exprInput.selectionStart = exprInput.selectionEnd = start + value.length;
+            exprInput.focus();
+        }
+
+        function moveCursor(dir) {
+            let pos = exprInput.selectionStart;
+            if (dir === 'left' && pos > 0) pos--;
+            if (dir === 'right' && pos < exprInput.value.length) pos++;
+            if (dir === 'up') pos = 0; 
+            if (dir === 'down') pos = exprInput.value.length; 
+            
+            exprInput.selectionStart = exprInput.selectionEnd = pos;
+            exprInput.focus();
+        }
+
+        function deleteAtCursor() {
+            let start = exprInput.selectionStart;
+            if (start === 0) return;
+            let text = exprInput.value;
+            exprInput.value = text.substring(0, start - 1) + text.substring(start);
+            exprInput.selectionStart = exprInput.selectionEnd = start - 1;
+            exprInput.focus();
+        }
+
+        function clearScreen() { 
+            exprInput.value = ""; 
+            resultDiv.innerText = "0";
+            if(isShifted) toggleShift(); 
+            exprInput.focus();
+        }
+
+        function calculate() {
+            let currentExpression = exprInput.value;
+            if (currentExpression === "") return;
+            
+            let mathString = currentExpression
+                .replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'Math.PI')
+                .replace(/Ans/g, lastAnswer).replace(/\^/g, '**')
+                .replace(/sin⁻¹\(/g, 'asinD(').replace(/cos⁻¹\(/g, 'acosD(').replace(/tan⁻¹\(/g, 'atanD(')
+                .replace(/sin\(/g, 'sinD(').replace(/cos\(/g, 'cosD(').replace(/tan\(/g, 'tanD(')
+                .replace(/log\(/g, 'Math.log10(').replace(/ln\(/g, 'Math.log(').replace(/√\(/g, 'Math.sqrt(').replace(/abs\(/g, 'Math.abs(');
+            
+            try {
+                let result = eval(mathString);
+                if (result % 1 !== 0) result = parseFloat(result.toFixed(8));
+                resultDiv.innerText = result;
+                lastAnswer = result; 
+                exprInput.selectionStart = exprInput.selectionEnd = exprInput.value.length;
+            } catch (error) { 
+                resultDiv.innerText = 'Syntax ERROR'; 
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body; const btn = document.querySelector('.theme-toggle');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme'); btn.innerText = 'Dark Mode 🌙';
+            } else {
+                body.setAttribute('data-theme', 'dark'); btn.innerText = 'Light Mode ☀️';
+            }
+        }
+
+        const calculator = document.getElementById('calculator');
+        const dragHandle = document.getElementById('drag-handle');
+        let isDragging = false; let initialX, initialY, currentLeft, currentTop;
+
+        dragHandle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const style = window.getComputedStyle(calculator);
+            currentLeft = parseInt(style.left, 10); currentTop = parseInt(style.top, 10);
+            initialX = e.clientX; initialY = e.clientY;
+        });
+        document.addEventListener('mouseup', () => isDragging = false);
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                calculator.style.left = `${currentLeft + (e.clientX - initialX)}px`;
+                calculator.style.top = `${currentTop + (e.clientY - initialY)}px`;
+            }
+        });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(registration => {
+                    console.log('Service Worker مسجل بنجاح في النطاق:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('فشل تسجيل الـ Service Worker:', error);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
