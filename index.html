@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Casio Pro Calculator</title>
     
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#2c3e50">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
 
     <style>
         /* المتغيرات للألوان */
@@ -101,7 +99,7 @@
         button:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.3); }
 
         .btn-shift { background-color: #f1c40f; color: #333; font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px; transition: 0.2s; }
-        .btn-alpha { background-color: #e74c3c; color: white; font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px;}
+        .btn-alpha { background-color: #e74c3c; color: white; font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px; transition: 0.2s; }
         .btn-on { background-color: var(--screen-border); color: var(--text-color); font-size: 11px; border-radius: 50%; height: 38px; width: 48px; margin-top: -10px;}
         
         .btn-sci { background-color: var(--sci-btn-bg); color: var(--sci-btn-color); font-size: 13px; border-radius: 8px;} 
@@ -110,12 +108,16 @@
 
         .row-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 5px; }
         .row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+        /* ستايل لزراير الألفا والشفت عشان تبان متناسقة مع تصميمك */
+        .alpha-text { position: absolute; top: -12px; right: 2px; font-size: 9px; color: #e74c3c; font-weight: bold; }
+        .shift-text { position: absolute; top: -12px; left: 2px; font-size: 9px; color: #f1c40f; font-weight: bold; }
         
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-    <button class="theme-toggle" onclick="toggleTheme()">Dark Mode 🌙</button>
+    <button class="theme-toggle" onclick="toggleTheme()">Light Mode ☀️</button>
 
     <div class="calculator" id="calculator">
         <div class="brand-area" id="drag-handle" title="اسحب من هنا">
@@ -124,15 +126,19 @@
         </div>
 
         <div class="screen-container">
-            <div class="screen-indicators"><span id="shift-indicator" style="opacity: 0.2;">S</span> <span>D</span> <span>Math</span></div>
-            <input type="text" id="expression" class="screen-expression" inputmode="none" value="" autofocus>
+            <div class="screen-indicators">
+                <span id="shift-indicator" style="opacity: 0.2;">S</span> 
+                <span id="alpha-indicator" style="opacity: 0.2;">A</span> 
+                <span>D</span> <span>Math</span>
+            </div>
+            <input type="text" id="expression" class="screen-expression" inputmode="none" value="" autofocus="">
             <div id="result" class="screen-result">0</div>
         </div>
 
         <div class="keypad">
             <div class="row-top">
                 <button class="btn-shift" onclick="toggleShift()">SHIFT</button>
-                <button class="btn-alpha">ALPHA</button>
+                <button class="btn-alpha" onclick="toggleAlpha()">ALPHA</button> 
                 
                 <div class="d-pad">
                     <button class="dir-btn up" onclick="moveCursor('up')">▲</button>
@@ -149,7 +155,7 @@
             <div class="row-5">
                 <button class="btn-sci" onclick="insert('abs(')">abs</button>
                 <button class="btn-sci" onclick="insert('^3')">x³</button>
-                <button class="btn-sci" onclick="insert('^(-1)')">x⁻¹</button>
+                <button class="btn-sci" onclick="handleShiftBtn('!', '^(-1)')"><span class="shift-text">x!</span>x⁻¹</button> 
                 <button class="btn-sci" onclick="insert('log(')">log</button>
                 <button class="btn-sci" onclick="insert('ln(')">ln</button>
             </div>
@@ -161,18 +167,18 @@
                 <button class="btn-sci" onclick="insert('10^')">10^</button>
             </div>
             <div class="row-5">
-                <button class="btn-sci" onclick="insert('-')">(-)</button>
+                <button class="btn-sci" onclick="handleAlphaBtn('A', '-')"><span class="alpha-text">A</span>(-)</button> 
                 <button class="btn-sci" onclick="insert('Ans')">Ans</button>
-                <button class="btn-sci">hyp</button>
+                <button class="btn-sci" onclick="handleAlphaBtn('B', 'hyp')"><span class="alpha-text">B</span>hyp</button> 
                 <button class="btn-sci" id="btn-sin" onclick="insertTrig('sin')">sin</button>
                 <button class="btn-sci" id="btn-cos" onclick="insertTrig('cos')">cos</button>
             </div>
             <div class="row-5" style="margin-bottom: 20px;">
                 <button class="btn-sci" id="btn-tan" onclick="insertTrig('tan')">tan</button>
-                <button class="btn-sci" onclick="insert('(')">(</button>
-                <button class="btn-sci" onclick="insert(')')">)</button>
-                <button class="btn-sci">S⇔D</button>
-                <button class="btn-sci">M+</button>
+                <button class="btn-sci" onclick="handleAlphaBtn('X', '(')"><span class="alpha-text">X</span>(</button> 
+                <button class="btn-sci" onclick="handleAlphaBtn('Y', ')')"><span class="alpha-text">Y</span>)</button> 
+                <button class="btn-sci" onclick="insert('S&lt;=&gt;D')">S⇔D</button>
+                <button class="btn-sci" onclick="handleAlphaBtn('M', 'M+')"><span class="alpha-text">M</span>M+</button> 
             </div>
 
             <div class="row-5">
@@ -186,8 +192,8 @@
                 <button class="btn-num" onclick="insert('4')">4</button>
                 <button class="btn-num" onclick="insert('5')">5</button>
                 <button class="btn-num" onclick="insert('6')">6</button>
-                <button class="btn-op" onclick="insert('×')">×</button>
-                <button class="btn-op" onclick="insert('÷')">÷</button>
+                <button class="btn-op" onclick="handleShiftBtn('P', '×')"><span class="shift-text">nPr</span>×</button> 
+                <button class="btn-op" onclick="handleShiftBtn('C', '÷')"><span class="shift-text">nCr</span>÷</button> 
             </div>
             <div class="row-5">
                 <button class="btn-num" onclick="insert('1')">1</button>
@@ -210,8 +216,23 @@
         const exprInput = document.getElementById('expression');
         const resultDiv = document.getElementById('result');
         const shiftIndicator = document.getElementById('shift-indicator');
+        const alphaIndicator = document.getElementById('alpha-indicator');
+        
         let lastAnswer = "0";
         let isShifted = false;
+        let isAlpha = false;
+        
+        // مساحة تخزين المتغيرات
+        let memory = { A: 0, B: 0, X: 0, Y: 0, M: 0 };
+
+        // الدوال الرياضية المتقدمة
+        function fact(n) {
+            if (n < 0 || n % 1 !== 0) return NaN;
+            if (n === 0 || n === 1) return 1;
+            let result = 1; for (let i = 2; i <= n; i++) result *= i; return result;
+        }
+        function nPr(n, r) { return fact(n) / fact(n - r); }
+        function nCr(n, r) { return fact(n) / (fact(r) * fact(n - r)); }
 
         function sinD(x) { return Math.sin(x * Math.PI / 180); }
         function cosD(x) { return Math.cos(x * Math.PI / 180); }
@@ -222,23 +243,46 @@
 
         function toggleShift() {
             isShifted = !isShifted;
+            isAlpha = false; 
+            updateIndicators();
+        }
+
+        function toggleAlpha() {
+            isAlpha = !isAlpha;
+            isShifted = false; 
+            updateIndicators();
+        }
+
+        function updateIndicators() {
+            shiftIndicator.style.opacity = isShifted ? '1' : '0.2';
+            alphaIndicator.style.opacity = isAlpha ? '1' : '0.2';
+            
             const shiftBtn = document.querySelector('.btn-shift');
             shiftBtn.style.transform = isShifted ? 'scale(0.9)' : 'scale(1)';
             shiftBtn.style.boxShadow = isShifted ? 'none' : '0 4px 0 rgba(0,0,0,0.3)';
-            shiftIndicator.style.opacity = isShifted ? '1' : '0.2';
             
+            const alphaBtn = document.querySelector('.btn-alpha');
+            alphaBtn.style.transform = isAlpha ? 'scale(0.9)' : 'scale(1)';
+            alphaBtn.style.boxShadow = isAlpha ? 'none' : '0 4px 0 rgba(0,0,0,0.3)';
+
             document.getElementById('btn-sin').innerText = isShifted ? 'sin⁻¹' : 'sin';
             document.getElementById('btn-cos').innerText = isShifted ? 'cos⁻¹' : 'cos';
             document.getElementById('btn-tan').innerText = isShifted ? 'tan⁻¹' : 'tan';
         }
 
         function insertTrig(type) {
-            if (isShifted) {
-                insert(type + '⁻¹(');
-                toggleShift(); 
-            } else {
-                insert(type + '(');
-            }
+            if (isShifted) { insert(type + '⁻¹('); toggleShift(); } 
+            else { insert(type + '('); }
+        }
+
+        function handleAlphaBtn(alphaVal, normalVal) {
+            if (isAlpha) { insert(alphaVal); toggleAlpha(); }
+            else { insert(normalVal); }
+        }
+
+        function handleShiftBtn(shiftVal, normalVal) {
+            if (isShifted) { insert(shiftVal); toggleShift(); }
+            else { insert(normalVal); }
         }
 
         function insert(value) {
@@ -273,14 +317,29 @@
             exprInput.value = ""; 
             resultDiv.innerText = "0";
             if(isShifted) toggleShift(); 
+            if(isAlpha) toggleAlpha();
             exprInput.focus();
         }
 
         function calculate() {
-            let currentExpression = exprInput.value;
-            if (currentExpression === "") return;
+            let expr = exprInput.value;
+            if (expr === "") return;
+
+            expr = expr.replace(/(\d+)\(/g, '$1*(');
+            expr = expr.replace(/(\d+)([ABXYM])/g, '$1*$2');
+            expr = expr.replace(/\)\(/g, ')*(');
+            expr = expr.replace(/([ABXYM])\(/g, '$1*(');
+            expr = expr.replace(/([ABXYM])([ABXYM])/g, '$1*$2');
+
+            expr = expr.replace(/A/g, `(${memory.A})`).replace(/B/g, `(${memory.B})`)
+                       .replace(/X/g, `(${memory.X})`).replace(/Y/g, `(${memory.Y})`)
+                       .replace(/M/g, `(${memory.M})`);
+
+            expr = expr.replace(/(\d+)!/g, 'fact($1)');
+            expr = expr.replace(/(\d+)P(\d+)/g, 'nPr($1,$2)');
+            expr = expr.replace(/(\d+)C(\d+)/g, 'nCr($1,$2)');
             
-            let mathString = currentExpression
+            let mathString = expr
                 .replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'Math.PI')
                 .replace(/Ans/g, lastAnswer).replace(/\^/g, '**')
                 .replace(/sin⁻¹\(/g, 'asinD(').replace(/cos⁻¹\(/g, 'acosD(').replace(/tan⁻¹\(/g, 'atanD(')
@@ -328,9 +387,10 @@
     </script>
 
     <script>
+        // التعديل هنا: ضفنا ./ قبل sw.js عشان يشتغل كويب أب من على جيتهاب
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
+                navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
                     console.log('Service Worker مسجل بنجاح في النطاق:', registration.scope);
                 })
@@ -340,5 +400,5 @@
             });
         }
     </script>
-</body>
-</html>
+
+</body></html>
