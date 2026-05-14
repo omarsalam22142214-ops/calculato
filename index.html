@@ -28,22 +28,21 @@
             background-color: var(--bg-color); margin: 0;
             font-family: 'Arial', sans-serif; user-select: none; transition: background-color 0.4s ease; 
             overflow: hidden; touch-action: none; 
+            /* التعديل لضمان التوسيط على شاشات الديسكتوب مع الاحتفاظ بشكل الموبايل */
+            display: flex; justify-content: center; align-items: center; height: 100vh;
         }
 
         .calculator {
             background: linear-gradient(to bottom, var(--calc-bg-top), var(--calc-bg-bottom));
             padding: max(env(safe-area-inset-top), 15px) 15px max(env(safe-area-inset-bottom), 15px);
-            box-sizing: border-box; width: 100vw; height: 100dvh; 
-            display: flex; flex-direction: column; position: fixed; top: 0; left: 0;
+            box-sizing: border-box; 
+            width: 100vw; 
+            max-width: 420px; /* إجبار العرض على مقاس الموبايل دائماً */
+            height: 100dvh; 
+            max-height: 900px; /* إجبار الطول على مقاس الموبايل */
+            display: flex; flex-direction: column; position: relative;
+            box-shadow: 0 10px 40px var(--shadow-color); /* ظل خارجي لشكل جمالي على الديسكتوب */
             transition: background 0.4s ease;
-        }
-
-        @media (min-width: 600px) {
-            .calculator {
-                width: 380px; height: 85vh; min-height: 680px;
-                position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                border-radius: 30px; box-shadow: 0 20px 40px var(--shadow-color), inset 0 2px 8px rgba(255,255,255,0.2);
-            }
         }
 
         .brand-area {
@@ -314,7 +313,6 @@
             let expr = exprInput.value;
             if (expr === "") return;
 
-            // تم استبدال الحروف الخاصة بأكواد آمنة
             expr = expr.replace(/(\d+)\(/g, '$1*(');
             expr = expr.replace(/(\d+)([ABXYM])/g, '$1*$2');
             expr = expr.replace(/\)\(/g, ')*(');
